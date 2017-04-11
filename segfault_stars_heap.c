@@ -56,10 +56,10 @@ void heap_add(heap_list_ptr curList, int value){
         return;
     }
     heap_node_ptr curNode = curList->head;
-    while(curNode->next != NULL && curNode->val > value){
+    while(curNode->next != NULL && value < curNode->val){
         curNode = curNode->next;
     }
-    if(curNode->val > value){
+    if(value >= curNode->val){
         printf("going down\n");
         heap_add(curNode->children, value);
         return;        
