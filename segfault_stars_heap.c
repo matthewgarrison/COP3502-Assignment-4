@@ -13,7 +13,15 @@ int main() {
         printf("\n");
     }
 
-    heap_print(heap->root_list);
+    printf("\n\n----\nPulling...\n----\n\n");
+
+    for(int i=0; i<5; i++){
+        printf("%d\n", heap_pull(heap->root_list));
+        heap_print(heap->root_list);
+        printf("\n");
+    }
+
+    // heap_print(heap->root_list);
     printf("\n");
 
     return 0;
@@ -85,4 +93,29 @@ void heap_print(heap_list_ptr curList){
         curNode = curNode->next;
     }
     printf(")");
+}
+
+int heap_peek(heap_list_ptr heap_list){
+    return heap_list->head->val;
+}
+
+int heap_pull(heap_list_ptr curList){
+    heap_node_ptr toRemove = curList->tail;
+    heap_node_ptr stitcher = curList->head;
+    int toReturn = toRemove->val;
+    while(stitcher->next != curList->tail){
+        stitcher=stitcher->next;
+    }
+    stitcher->next = curList->tail->children->head;
+    curList->tail = curList->tail->children->tail;
+    // free(toRemove);
+    return toReturn;
+}
+
+void delete_list(heap_list_ptr list){
+
+}
+
+void delete_node(heap_node_ptr node){
+
 }
