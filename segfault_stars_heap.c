@@ -1,24 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "segfault_stars_heap.h"
 
 int main() {
 
     heap_ptr heap = heap_create();
     int data, i;
-    for(i = 0; i < 8; i++){
-        scanf("%d", &data);
-        heap_add(heap->root_list, data);
-        heap_print(heap->root_list);
-        printf("\n");
-    }
+    char buffer[64];
 
-    printf("\n\n----\nPulling...\n----\n\n");
-
-    for(i = 0; i < 5; i++){
-        printf("%d\n", heap_pull(heap->root_list));
-        heap_print(heap->root_list);
-        printf("\n");
+    while(1){
+        scanf("%s", buffer);
+        if(strcmp(buffer, "quit") == 0){
+            break;
+        }
+        if(strcmp(buffer, "add") == 0){
+            scanf("%d", &data);
+            heap_add(heap->root_list, data);
+            heap_print(heap->root_list);
+            printf("\n");
+        }
+        else if(strcmp(buffer, "pull") == 0){
+            printf("%d\n", heap_pull(heap->root_list));
+            heap_print(heap->root_list);
+            printf("\n");
+        }
+        else if(strcmp(buffer, "peek") == 0){
+            printf("%d\n", heap_peek(heap->root_list));
+            heap_print(heap->root_list);
+            printf("\n");
+        }
+        else{
+            printf("Command not recognized!\n");
+        }
     }
 
     // heap_print(heap->root_list);
@@ -69,7 +83,6 @@ void heap_add(heap_list_ptr curList, int value){ //Works
         curNode = curNode->next;
     }
     if(value >= curNode->val){
-        printf("going down\n");
         heap_add(curNode->children, value);
         return;
     }
@@ -88,34 +101,40 @@ int heap_peek(heap_list_ptr heap_list){ //Works
 }
 
 int heap_pull(heap_list_ptr curList){ //Mostly works but is still slightly broken
-    int toReturn = curList->tail->val;
-    heap_node_ptr toRemove = curList->tail;
-    printf("Got the value.\n");
-    if(curList->head == curList->tail)//Case where head and tail are equal. This is the case that is broken
-    {
-        printf("Going into if case.\n");
-        curList->head = curList->head->children->head;
-        curList->tail = curList->head->children->tail;
-        printf("New Head Value: %d\nNew Tail Value: %d\n", curList->head->val, curList->tail->val);
+
+    if(is_list_empty(curList)){
+        printf("Tried to pull from empty list!\n");
+        return -1;
     }
-    else//Case where head and tail are not equal. This case seems to be working just fine
-    {
-        printf("Going into else case.\n");
-        if(toRemove->children->head == NULL)
-        {
-            toRemove->prev->next = NULL;
-            curList->tail = toRemove->prev;
+    heap_node_ptr toReturn = curList->tail;
+    int returnVal = toReturn->val;
+    if(curList->head != curList->tail){ //there are multiple children in the root list
+        if(is_list_empty(curList->tail->children)){ //no children for the root tail
+            curList->tail = curList->tail->prev;
+            curList->tail->next = NULL;
+            free(toReturn);
+            return returnVal;
         }
-        else
-        {
-            toRemove->children->head->prev = toRemove->prev;
-            toRemove->prev->next = toRemove->children->head;
-            curList->tail = toRemove->children->tail;
+        else{ //tail has at least one child (tail and head could be same or different, shouldn't matter)
+            curList->tail->prev->next = curList->tail->children->head;
+            curList->tail->prev->next->prev = curList->tail->prev;
+            curList->tail = curList->tail->children->tail;
+            free(toReturn);
+            return returnVal;
         }
-        printf("New Head Value: %d\nNew Tail Value: %d\n", curList->head->val, curList->tail->val);
     }
-    free(toRemove);
-    return toReturn;
+    //root list has only one child
+    if(is_list_empty(curList->tail->children)){ //child has no children, final node in heap
+        curList->tail = NULL;
+        curList->head = NULL;
+        free(toReturn);
+        return returnVal;
+    }
+    //multiple children in child
+    curList->head = curList->head->children->head;
+    curList->tail = curList->tail->children->tail;
+    free(toReturn);
+    return returnVal;
 }
 
 void heap_print(heap_list_ptr curList){ //Works
@@ -130,7 +149,7 @@ void heap_print(heap_list_ptr curList){ //Works
         heap_print(curNode->children);
         curNode = curNode->next;
     }
-    printf(")");
+    printf(" )");
 }
 
 void delete_list(heap_list_ptr list){
@@ -139,4 +158,8 @@ void delete_list(heap_list_ptr list){
 
 void delete_node(heap_node_ptr node){
 
+}
+
+int is_list_empty(heap_list_ptr curList){
+    return curList->head == NULL;
 }

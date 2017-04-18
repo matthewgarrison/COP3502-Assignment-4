@@ -39,6 +39,7 @@ heap_list_ptr list_create();
 void heap_add(heap_list_ptr curList, int value);
 int heap_pull(heap_list_ptr curList);
 int heap_peek(heap_list_ptr heap_list);
+int is_list_empty(heap_list_ptr curList);
 //Delete Functions
 void delete_list(heap_list_ptr list);
 void delete_node(heap_node_ptr node);
