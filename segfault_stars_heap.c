@@ -5,8 +5,8 @@
 int main() {
 
     heap_ptr heap = heap_create();
-    int data;
-    for(int i=0; i<10; i++){
+    int data, i;
+    for(i = 0; i < 8; i++){
         scanf("%d", &data);
         heap_add(heap->root_list, data);
         heap_print(heap->root_list);
@@ -15,7 +15,7 @@ int main() {
 
     printf("\n\n----\nPulling...\n----\n\n");
 
-    for(int i=0; i<5; i++){
+    for(i = 0; i < 5; i++){
         printf("%d\n", heap_pull(heap->root_list));
         heap_print(heap->root_list);
         printf("\n");
@@ -32,6 +32,7 @@ heap_node_ptr heap_node_create(int val){
     new_node -> val = val;
     new_node -> children = list_create();
     new_node -> next = NULL;
+    new_node -> prev = NULL;
     return new_node;
 }
 
@@ -55,7 +56,7 @@ heap_list_ptr list_create() {
     return new_list;
 }
 
-void heap_add(heap_list_ptr curList, int value){
+void heap_add(heap_list_ptr curList, int value){ //Works
     if(curList->head == NULL){
         if(DEBUG)
             printf("empty list\n");
@@ -70,19 +71,56 @@ void heap_add(heap_list_ptr curList, int value){
     if(value >= curNode->val){
         printf("going down\n");
         heap_add(curNode->children, value);
-        return;        
+        return;
     }
     else{
         if(DEBUG)
             printf("reached end of list\n");
-        curNode->next = heap_node_create(value);
+        heap_node_ptr newNode = heap_node_create(value);
+        curNode->next = newNode;
+        newNode->prev = curNode;
         curList->tail = curNode->next;
     }
 }
 
-void heap_print(heap_list_ptr curList){
+int heap_peek(heap_list_ptr heap_list){ //Works
+    return heap_list->tail->val;
+}
+
+int heap_pull(heap_list_ptr curList){ //Mostly works but is still slightly broken
+    int toReturn = curList->tail->val;
+    heap_node_ptr toRemove = curList->tail;
+    printf("Got the value.\n");
+    if(curList->head == curList->tail)//Case where head and tail are equal. This is the case that is broken
+    {
+        printf("Going into if case.\n");
+        curList->head = curList->head->children->head;
+        curList->tail = curList->head->children->tail;
+        printf("New Head Value: %d\nNew Tail Value: %d\n", curList->head->val, curList->tail->val);
+    }
+    else//Case where head and tail are not equal. This case seems to be working just fine
+    {
+        printf("Going into else case.\n");
+        if(toRemove->children->head == NULL)
+        {
+            toRemove->prev->next = NULL;
+            curList->tail = toRemove->prev;
+        }
+        else
+        {
+            toRemove->children->head->prev = toRemove->prev;
+            toRemove->prev->next = toRemove->children->head;
+            curList->tail = toRemove->children->tail;
+        }
+        printf("New Head Value: %d\nNew Tail Value: %d\n", curList->head->val, curList->tail->val);
+    }
+    free(toRemove);
+    return toReturn;
+}
+
+void heap_print(heap_list_ptr curList){ //Works
     if(curList->head==NULL){
-        printf("(!!)");
+        //printf("(!!)");
         return;
     }
     heap_node_ptr curNode = curList->head;
@@ -93,23 +131,6 @@ void heap_print(heap_list_ptr curList){
         curNode = curNode->next;
     }
     printf(")");
-}
-
-int heap_peek(heap_list_ptr heap_list){
-    return heap_list->head->val;
-}
-
-int heap_pull(heap_list_ptr curList){
-    heap_node_ptr toRemove = curList->tail;
-    heap_node_ptr stitcher = curList->head;
-    int toReturn = toRemove->val;
-    while(stitcher->next != curList->tail){
-        stitcher=stitcher->next;
-    }
-    stitcher->next = curList->tail->children->head;
-    curList->tail = curList->tail->children->tail;
-    // free(toRemove);
-    return toReturn;
 }
 
 void delete_list(heap_list_ptr list){
