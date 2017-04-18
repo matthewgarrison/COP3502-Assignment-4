@@ -2,18 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 #include "segfault_stars_heap.h"
+#include <time.h>
 
 int main() {
+    FILE * file = fopen("segfault.txt", "r");
+
+    clock_t start, end;
+    double Tn;
+    int numRuns = 0;
+
     heap_t * heap = heapCreate();
     int data, i;
     char buffer[64];
 
+    start = clock();
     while (1) {
-        scanf("%s", buffer);
+        numRuns++;
+        fscanf(file, "%s", buffer);
         if (strcmp(buffer, "quit") == 0) {
             break;
         } else if(strcmp(buffer, "add") == 0){
-            scanf("%d", &data);
+            fscanf(file, "%d", &data);
             heapInsert(heap->rootList, data);
             heapPrint(heap->rootList);
             printf("\n");
@@ -30,8 +39,12 @@ int main() {
         }
     }
     printf("\n");
+    end = clock();
+    Tn = (double)(end - start) / CLOCKS_PER_SEC / numRuns * 1000.0;
+    printf("T(n) = %0.8fms\n", Tn);
 
     deleteHeap(heap);
+    fclose(file);
 
     return 0;
 }
