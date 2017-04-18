@@ -5,7 +5,51 @@
 #include <time.h>
 
 int main() {
-    FILE * file = fopen("segfault.txt", "r");
+    // Run main 20 times.
+    int i, trials = 50, runs = 10;
+    double T10 = 0.0, T100 = 0.0, T1000= 0.0, c10 = 0.0, c100 = 0.0, c1000 = 0.0;
+    for (i = 0; i < trials; i++) {
+        int time = main2(runs);
+        double Tn = (double)(time) / CLOCKS_PER_SEC / runs * 1000.0;
+        double c = Tn / runs;
+        T10 += Tn;
+        c10 += c;
+    }
+    runs = 100;
+    for (i = 0; i < trials; i++) {
+        int time = main2(runs);
+        double Tn = (double)(time) / CLOCKS_PER_SEC / runs * 1000.0;
+        double c = Tn / runs;
+        T100 += Tn;
+        c100 += c;
+    }
+    runs = 1000;
+    for (i = 0; i < trials; i++) {
+        int time = main2(runs);
+        double Tn = (double)(time) / CLOCKS_PER_SEC / runs * 1000.0;
+        double c = Tn / runs;
+        T1000 += Tn;
+        c1000 += c;
+    }
+
+    T10 /= trials;
+    T100 /= trials;
+    T1000 /= trials;
+    c10 /= trials;
+    c100 /= trials;
+    c1000 /= trials;
+    printf("10: t=%0.8f, c=%0.8f\n", T10, c10);
+    printf("100: t=%0.8f, c=%0.8f\n", T100, c100);
+    printf("1000: t=%0.8f, c=%0.8f\n", T1000, c1000);
+
+    return 0;
+}
+
+int main2(int val) {
+    FILE * file;
+    if (val == 10) file = fopen("segfault10.txt", "r");
+    else if (val == 100) file = fopen("segfault100.txt", "r");
+    else fopen("segfault1000.txt", "r");
 
     clock_t start, end;
     double Tn;
@@ -24,8 +68,8 @@ int main() {
         } else if(strcmp(buffer, "add") == 0){
             fscanf(file, "%d", &data);
             heapInsert(heap->rootList, data);
-            heapPrint(heap->rootList);
-            printf("\n");
+            //heapPrint(heap->rootList);
+            //printf("\n");
         } else if (strcmp(buffer, "pull") == 0) {
             printf("%d\n", heapPull(heap->rootList));
             heapPrint(heap->rootList);
@@ -38,15 +82,17 @@ int main() {
             printf("Command not recognized!\n");
         }
     }
-    printf("\n");
+    //printf("\n");
     end = clock();
     Tn = (double)(end - start) / CLOCKS_PER_SEC / numRuns * 1000.0;
-    printf("T(n) = %0.8fms\n", Tn);
+    //printf("Total time: %d\n", (end - start));
+    //printf("Number of operations: %d\n", numRuns);
+    //printf("T(n) = %0.8fms\n", Tn);
+    //printf("Assuming O(n), c = T(n)/(n) = %0.8f\n", (Tn / numRuns));
 
     deleteHeap(heap);
     fclose(file);
-
-    return 0;
+    return end - start;
 }
 
 // Creates the heap.
