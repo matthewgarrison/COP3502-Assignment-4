@@ -6,7 +6,7 @@
 typedef struct heapNode {
 	int val;
 	struct heapList * children; // Children of this node; level below this node.
-	struct heapNode * next, * prev // Siblings of this node; same level as this node
+	struct heapNode * next, * prev; // Siblings of this node; same level as this node
 } heapNode_t;
 
 typedef struct heapList {
