@@ -4,162 +4,178 @@
 #include "segfault_stars_heap.h"
 
 int main() {
-
-    heap_ptr heap = heap_create();
+    heap_t * heap = heapCreate();
     int data, i;
     char buffer[64];
 
-    while(1){
+    while (1) {
         scanf("%s", buffer);
-        if(strcmp(buffer, "quit") == 0){
+        if (strcmp(buffer, "quit") == 0) {
             break;
-        }
-        if(strcmp(buffer, "add") == 0){
+        } else if(strcmp(buffer, "add") == 0){
             scanf("%d", &data);
-            heap_add(heap->root_list, data);
-            heap_print(heap->root_list);
+            heapInsert(heap->rootList, data);
+            heapPrint(heap->rootList);
             printf("\n");
-        }
-        else if(strcmp(buffer, "pull") == 0){
-            printf("%d\n", heap_pull(heap->root_list));
-            heap_print(heap->root_list);
+        } else if (strcmp(buffer, "pull") == 0) {
+            printf("%d\n", heapPull(heap->rootList));
+            heapPrint(heap->rootList);
             printf("\n");
-        }
-        else if(strcmp(buffer, "peek") == 0){
-            printf("%d\n", heap_peek(heap->root_list));
-            heap_print(heap->root_list);
+        } else if (strcmp(buffer, "peek") == 0) {
+            printf("%d\n", heapPeek(heap->rootList));
+            heapPrint(heap->rootList);
             printf("\n");
-        }
-        else{
+        } else{
             printf("Command not recognized!\n");
         }
     }
-
-    // heap_print(heap->root_list);
     printf("\n");
+
+    deleteHeap(heap);
 
     return 0;
 }
 
-heap_node_ptr heap_node_create(int val){
-    heap_node_ptr new_node = (heap_node_ptr)malloc(sizeof(heap_node_t));
-    new_node -> val = val;
-    new_node -> children = list_create();
-    new_node -> next = NULL;
-    new_node -> prev = NULL;
-    return new_node;
+// Creates the heap.
+heap_t * heapCreate() {
+    heap_t * newHeap = (heap_t *)malloc(sizeof(heap_t));
+    newHeap -> rootList = listCreate();
+    return newHeap;
 }
 
-heap_ptr heap_create() {
-    heap_ptr new_heap = (heap_ptr)malloc(sizeof(heap_t));
-    // We'll never access the root node's value, so it doesn't matter what it is.
-    new_heap -> root_list = list_create();
-    return new_heap;
+// Creates the heap nodes.
+heapNode_t * heapNodeCreate(int val) {
+    heapNode_t * newNode = (heapNode_t *)malloc(sizeof(heapNode_t));
+    newNode->val = val;
+    newNode->children = listCreate();
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    return newNode;
 }
 
-// list_node_t * list_node_create(heap_node_t * val) {
-//     list_node_t * new_node = (list_node_t*)malloc(sizeof(list_node_t));
-//     new_node -> val = val;
-//     return new_node;
-// }
-
-heap_list_ptr list_create() {
-    heap_list_ptr new_list = (heap_list_ptr)malloc(sizeof(heap_list_t));
-    new_list -> head = NULL;
-    new_list -> tail = NULL;
-    return new_list;
+// Creates the lists.
+heapList_t * listCreate() {
+    heapList_t * newList = (heapList_t *)malloc(sizeof(heapList_t));
+    newList->head = NULL;
+    newList->tail = NULL;
+    return newList;
 }
 
-void heap_add(heap_list_ptr curList, int value){ //Works
-    if(curList->head == NULL){
-        if(DEBUG)
-            printf("empty list\n");
-        curList->head = heap_node_create(value);
-        curList->tail = curList->head;
+// Inserts a value into the heap.
+void heapInsert(heapList_t * currList, int value) {
+    // The list is empty.
+    if(currList->head == NULL){
+        if (DEBUG) printf("Empty list\n");
+        currList->head = heapNodeCreate(value);
+        currList->tail = currList->head;
         return;
     }
-    heap_node_ptr curNode = curList->head;
-    while(curNode->next != NULL && value < curNode->val){
-        curNode = curNode->next;
+
+    heapNode_t* currNode = currList->head;
+    // Go until the current node's value is greater than the new value, or we reach the end of the list.
+    while(currNode->next != NULL && value < currNode->val){
+        currNode = currNode->next;
     }
-    if(value >= curNode->val){
-        heap_add(curNode->children, value);
+    if(value >= currNode->val){
+        // The value is greater than or equal to the new value, so we go down a level.
+        heapInsert(currNode->children, value);
         return;
-    }
-    else{
-        if(DEBUG)
-            printf("reached end of list\n");
-        heap_node_ptr newNode = heap_node_create(value);
-        curNode->next = newNode;
-        newNode->prev = curNode;
-        curList->tail = curNode->next;
+    } else{
+        // We reached the end of the list, so create a new node and append to the end of the list.
+        if (DEBUG) printf("Reached end of list\n");
+        heapNode_t * newNode = heapNodeCreate(value);
+        currNode->next = newNode;
+        newNode->prev = currNode;
+        currList->tail = newNode;
     }
 }
 
-int heap_peek(heap_list_ptr heap_list){ //Works
-    return heap_list->tail->val;
+// Returns the smallest value in the heap.
+int heapPeek(heapList_t * currList) {
+    return currList->tail->val;
 }
 
-int heap_pull(heap_list_ptr curList){ //Mostly works but is still slightly broken
-
-    if(is_list_empty(curList)){
+// Returns and removes the smallest value in the heap.
+int heapPull(heapList_t * currList) {
+    if (listIsEmpty(currList)) {
         printf("Tried to pull from empty list!\n");
         return -1;
     }
-    heap_node_ptr toReturn = curList->tail;
+
+    heapNode_t * toReturn = currList->tail;
     int returnVal = toReturn->val;
-    if(curList->head != curList->tail){ //there are multiple children in the root list
-        if(is_list_empty(curList->tail->children)){ //no children for the root tail
-            curList->tail = curList->tail->prev;
-            curList->tail->next = NULL;
-            free(toReturn);
-            return returnVal;
+    if(currList->head != currList->tail){
+        // There are multiple children in the root list.
+        if (listIsEmpty(currList->tail->children)) {
+            // The tail of the root list has no children.
+            currList->tail = currList->tail->prev;
+            currList->tail->next = NULL;
         }
-        else{ //tail has at least one child (tail and head could be same or different, shouldn't matter)
-            curList->tail->prev->next = curList->tail->children->head;
-            curList->tail->prev->next->prev = curList->tail->prev;
-            curList->tail = curList->tail->children->tail;
-            free(toReturn);
-            return returnVal;
+        else{
+            // The tail has at least one child.
+            // (Tail and head could be the same or different, shouldn't matter.)
+            currList->tail->prev->next = currList->tail->children->head;
+            currList->tail->prev->next->prev = currList->tail->prev;
+            currList->tail = currList->tail->children->tail;
+        }
+    } else {
+        // Root list has only one child.
+        if (listIsEmpty(currList->tail->children)) {
+            // Child has no children (final node in heap).
+            currList->tail = NULL;
+            currList->head = NULL;
+        } else {
+            // The child has multiple children.
+            currList->head = currList->head->children->head;
+            currList->tail = currList->tail->children->tail;
         }
     }
-    //root list has only one child
-    if(is_list_empty(curList->tail->children)){ //child has no children, final node in heap
-        curList->tail = NULL;
-        curList->head = NULL;
-        free(toReturn);
-        return returnVal;
-    }
-    //multiple children in child
-    curList->head = curList->head->children->head;
-    curList->tail = curList->tail->children->tail;
+
     free(toReturn);
     return returnVal;
 }
 
-void heap_print(heap_list_ptr curList){ //Works
-    if(curList->head==NULL){
-        //printf("(!!)");
+// Checks if the heap is empty.
+int heapIsEmpty(heap_t * heap) {
+    return listIsEmpty(heap->rootList);
+}
+
+// Checks if the list is empty.
+int listIsEmpty(heapList_t * currList){
+    return (currList->head == NULL);
+}
+
+// Prints the contents of the heap.
+void heapPrint(heapList_t * currList){
+    if (currList->head == NULL) {
         return;
     }
-    heap_node_ptr curNode = curList->head;
+    heapNode_t * currNode = currList->head;
     printf("(");
-    while(curNode != NULL){
-        printf(" %d", curNode->val);
-        heap_print(curNode->children);
-        curNode = curNode->next;
+    while (currNode != NULL) {
+        printf(" %d", currNode->val);
+        heapPrint(currNode->children);
+        currNode = currNode->next;
     }
     printf(" )");
 }
 
-void delete_list(heap_list_ptr list){
-
+void deleteList(heapList_t * list) {
+    heapNode_t * currNode = list->head;
+    while (currNode != NULL) {
+        heapNode_t * nextNode = currNode->next;
+        deleteNode(currNode);
+        currNode = nextNode;
+    }
+    free(list);
 }
 
-void delete_node(heap_node_ptr node){
-
+void deleteNode(heapNode_t * node) {
+    deleteList(node->children);
+    free(node);
 }
 
-int is_list_empty(heap_list_ptr curList){
-    return curList->head == NULL;
+void deleteHeap(heap_t * heap) {
+    deleteList(heap->rootList);
+    free(heap);
 }

@@ -1,49 +1,40 @@
 #ifndef SEGFAULT_STARS_H
 #define SEGFAULT_STARS_H
 
-// struct heap_list;
-
-// typedef struct list_node {
-// 	struct heap_node * val;
-// 	struct list_node * next;
-// } list_node_t;
-
 #define DEBUG 0
 
-typedef struct heap_node {
+typedef struct heapNode {
 	int val;
-	struct heap_list * children; //level below current node
-	struct heap_node * next, * prev;		//same level as current node
-} heap_node_t;
+	struct heapList * children; // Children of this node; level below this node.
+	struct heapNode * next, * prev // Siblings of this node; same level as this node
+} heapNode_t;
 
-typedef heap_node_t * heap_node_ptr;
-
-typedef struct heap_list{
-	heap_node_t * head, * tail;
-} heap_list_t;
-
-typedef heap_list_t * heap_list_ptr;
+typedef struct heapList {
+	heapNode_t * head, * tail;
+} heapList_t;
 
 typedef struct {
-	heap_list_t * root_list;
+	heapList_t * rootList;
 } heap_t;
 
-typedef heap_t * heap_ptr;
+// Creates the heap, lists, and heap nodes.
+heap_t * heapCreate();
+heapNode_t * headNodeCreate(int val);
+heapList_t * listCreate();
 
-//Creation Functions
-heap_node_ptr head_node_create(int val);
-heap_ptr heap_create();
-// list_node_t * list_node_create();
-heap_list_ptr list_create();
-//Heap Properties Functions
-void heap_add(heap_list_ptr curList, int value);
-int heap_pull(heap_list_ptr curList);
-int heap_peek(heap_list_ptr heap_list);
-int is_list_empty(heap_list_ptr curList);
-//Delete Functions
-void delete_list(heap_list_ptr list);
-void delete_node(heap_node_ptr node);
-//Print Function
-void heap_print(heap_list_ptr heap);
+// The main functions of the heap.
+void heapInsert(heapList_t * currList, int value);
+int heapPull(heapList_t * currList);
+int heapPeek(heapList_t * currList);
+int heapIsEmpty(heap_t * heap);
+int listIsEmpty(heapList_t * currList);
+
+// Deletes the heap, lists, and heap nodes.
+void deleteList(heapList_t * list);
+void deleteNode(heapNode_t * node);
+void deleteHeap(heap_t * heap);
+
+// Prints the contents of the heap.
+void heapPrint(heapList_t * heap);
 
 #endif
