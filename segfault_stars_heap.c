@@ -65,7 +65,7 @@ heapList_t * listCreate() {
 void heapInsert(heapList_t * currList, int value) {
     // The list is empty.
     if(currList->head == NULL){
-        if (DEBUG) printf("Empty list\n");
+        currList->head = heapNodeCreate(value);
         currList->head = heapNodeCreate(value);
         currList->tail = currList->head;
         return;
@@ -82,7 +82,6 @@ void heapInsert(heapList_t * currList, int value) {
         return;
     } else{
         // We reached the end of the list, so create a new node and append to the end of the list.
-        if (DEBUG) printf("Reached end of list\n");
         heapNode_t * newNode = heapNodeCreate(value);
         currNode->next = newNode;
         newNode->prev = currNode;
@@ -107,13 +106,12 @@ int heapPull(heapList_t * currList) {
     if(currList->head != currList->tail){
         // There are multiple children in the root list.
         if (listIsEmpty(currList->tail->children)) {
-            // The tail of the root list has no children.
+            // The tail of the root list has no children, so we just remove it from the list.
             currList->tail = currList->tail->prev;
             currList->tail->next = NULL;
-        }
-        else{
-            // The tail has at least one child.
-            // (Tail and head could be the same or different, shouldn't matter.)
+        } else{
+            // The tail has at least one child, so we append it's children to the root's list.
+            // (Tail and head of the tail's list could be the same or different, shouldn't matter.)
             currList->tail->prev->next = currList->tail->children->head;
             currList->tail->prev->next->prev = currList->tail->prev;
             currList->tail = currList->tail->children->tail;
@@ -160,6 +158,7 @@ void heapPrint(heapList_t * currList){
     printf(" )");
 }
 
+// Deletes a list, and all the nodes in the list.
 void deleteList(heapList_t * list) {
     heapNode_t * currNode = list->head;
     while (currNode != NULL) {
@@ -170,11 +169,13 @@ void deleteList(heapList_t * list) {
     free(list);
 }
 
+// Deletes a node, and all of it's children.
 void deleteNode(heapNode_t * node) {
     deleteList(node->children);
     free(node);
 }
 
+// Deletes the entire heap.
 void deleteHeap(heap_t * heap) {
     deleteList(heap->rootList);
     free(heap);

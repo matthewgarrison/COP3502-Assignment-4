@@ -1,8 +1,6 @@
 #ifndef SEGFAULT_STARS_H
 #define SEGFAULT_STARS_H
 
-#define DEBUG 0
-
 typedef struct heapNode {
 	int val;
 	struct heapList * children; // Children of this node; level below this node.
@@ -13,7 +11,7 @@ typedef struct heapList {
 	heapNode_t * head, * tail;
 } heapList_t;
 
-typedef struct {
+typedef struct heap {
 	heapList_t * rootList;
 } heap_t;
 
