@@ -124,6 +124,7 @@ int heapPull(heapList_t * currList) {
     }
 
     // Free the node we're removing and return its value.
+    free(toReturn->children);
     free(toReturn);
     return returnVal;
 }
