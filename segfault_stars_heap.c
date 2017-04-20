@@ -79,7 +79,6 @@ void heapInsert(heapList_t * currList, int value) {
     if(value >= currNode->val){
         // The value is greater than or equal to the new value, so we go down a level.
         heapInsert(currNode->children, value);
-        return;
     } else{
         // We reached the end of the list, so create a new node and append to the end of the list.
         heapNode_t * newNode = heapNodeCreate(value);
@@ -117,18 +116,15 @@ int heapPull(heapList_t * currList) {
             currList->tail = currList->tail->children->tail;
         }
     } else {
-        // Root list has only one child.
-        if (listIsEmpty(currList->tail->children)) {
-            // Child has no children (final node in heap).
-            currList->tail = NULL;
-            currList->head = NULL;
-        } else {
-            // The child has multiple children.
-            currList->head = currList->head->children->head;
-            currList->tail = currList->tail->children->tail;
-        }
+        // Root list has only one child, so we make set the root's list of children to
+        // the list of children of the node we're removing. (If the node we're removing
+        // has no children, then the root's head and tail pointers are just set to NULL.)
+        currList->head = currList->head->children->head;
+        currList->tail = currList->tail->children->tail;
     }
 
+    // Free the node we're removing and return its value.
+    free(toReturn->children);
     free(toReturn);
     return returnVal;
 }
