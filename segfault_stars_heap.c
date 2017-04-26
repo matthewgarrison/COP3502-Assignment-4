@@ -3,6 +3,10 @@
 #include <string.h>
 #include "segfault_stars_heap.h"
 
+// Driver function to test the heap. Commands:
+// add n: inserts n into the heap
+// pull: removes and returns the minimum value in the heap
+// peek: returns the minimum value in the heap
 int main() {
     heap_t * heap = heapCreate();
     int data, i;
@@ -94,6 +98,7 @@ int heapPeek(heapList_t * currList) {
 }
 
 // Returns and removes the smallest value in the heap.
+// This is a combination of peek-min and delete-min.
 int heapPull(heapList_t * currList) {
     if (listIsEmpty(currList)) {
         printf("Tried to pull from empty list!\n");
