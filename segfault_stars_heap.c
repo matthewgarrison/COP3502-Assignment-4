@@ -120,7 +120,7 @@ int heapPull(heapList_t * currList) {
             currList->tail = currList->tail->children->tail;
         }
     } else {
-        // Root list has only one child, so we make set the root's list of children to
+        // Root list has only one child, so we set the root's list of children to
         // the list of children of the node we're removing. (If the node we're removing
         // has no children, then the root's head and tail pointers are just set to NULL.)
         currList->head = currList->head->children->head;
