@@ -70,7 +70,6 @@ void heapInsert(heapList_t * currList, int value) {
     // The list is empty.
     if(currList->head == NULL){
         currList->head = heapNodeCreate(value);
-        currList->head = heapNodeCreate(value);
         currList->tail = currList->head;
         return;
     }
