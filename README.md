@@ -1,5 +1,11 @@
-# COP3502-Assignment-4
-Repo for the COP3502H (Computer Science 1 Honors) assignment 4.
+# COP3502H (Computer Science 1 Honors) Assignment 4
+
+### How to use this heap:
+
+1. Download segfault_stars_heap.c and segfault_stars_heap.h and compile them.
+2. Use the following commands: add n (inserts n into the heap), pull (removes and returns the minimum value in the heap), and peek (returns the minimum value in the heap). 
+
+### Details:
 
 This is a new implementation of a min-heap. To the best of our knowledge, this data structure is unique and a similar version does not exist elsewhere.
 
